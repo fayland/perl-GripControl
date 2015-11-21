@@ -1,6 +1,7 @@
 use Test::More;
 use Test::Exception;
-use GripControl::GripControl qw/decode_websocket_events/;
+use GripControl::WebSocketEvent;
+use GripControl::GripControl qw/decode_websocket_events encode_websocket_events/;
 
 my @events = decode_websocket_events("OPEN\r\nTEXT 5\r\nHello" .
                 "\r\nTEXT 0\r\n\r\nCLOSE\r\nTEXT\r\nCLOSE\r\n");
@@ -30,5 +31,15 @@ is $events[0]->content, 'Hello';
 
 throws_ok { decode_websocket_events("TEXT 5"); } qr/bad format/;
 throws_ok { decode_websocket_events("OPEN\r\nTEXT"); } qr/bad format/;
+
+# test encode_websocket_events as well
+my $events = encode_websocket_events(
+                GripControl::WebSocketEvent->new("TEXT", "Hello"),
+                GripControl::WebSocketEvent->new("TEXT", ""),
+                GripControl::WebSocketEvent->new("TEXT")
+            );
+is $events, "TEXT 5\r\nHello\r\nTEXT 0\r\n\r\nTEXT\r\n";
+$events = encode_websocket_events(GripControl::WebSocketEvent->new("OPEN"));
+is $events, "OPEN\r\n";
 
 done_testing();
