@@ -1,10 +1,20 @@
 package GripControl::GripControl;
 
 use base 'Exporter';
-our @EXPORT_OK = qw/decode_websocket_events encode_websocket_events/;
+our @EXPORT_OK = qw/websocket_control_message decode_websocket_events encode_websocket_events/;
 
 use Carp qw/croak/;
+use JSON;
 use GripControl::WebSocketEvent;
+
+sub websocket_control_message {
+    my $type = shift;
+    my $args = shift || {};
+
+    my %args = %$args;
+    $args{type} = $type;
+    return encode_json(\%args);
+}
 
 sub decode_websocket_events {
     my ($body) = @_;
