@@ -2,8 +2,8 @@ package GripControl::WebSocketEvent;
 
 use Moo;
 
-has 'type';
-has 'content';
+has 'type' => (is => 'rw');
+has 'content' => (is => 'rw');
 
 no Moo;
 1;
