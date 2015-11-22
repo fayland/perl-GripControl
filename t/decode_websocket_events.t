@@ -1,7 +1,7 @@
 use Test::More;
 use Test::Exception;
+use GripControl qw/decode_websocket_events encode_websocket_events/;
 use GripControl::WebSocketEvent;
-use GripControl::GripControl qw/decode_websocket_events encode_websocket_events/;
 
 my @events = decode_websocket_events("OPEN\r\nTEXT 5\r\nHello" .
                 "\r\nTEXT 0\r\n\r\nCLOSE\r\nTEXT\r\nCLOSE\r\n");

@@ -1,4 +1,4 @@
-package GripControl::GripControl;
+package GripControl;
 
 use base 'Exporter';
 our @EXPORT_OK = qw/websocket_control_message decode_websocket_events encode_websocket_events/;
