@@ -1,7 +1,7 @@
 package GripControl::WebSocketMessageFormat;
 
 use Moo;
-use MIME::Base64;
+use Mojo::Util qw(b64_encode);
 
 has 'content';
 has 'binary' => (default => sub { 0 });
@@ -12,7 +12,7 @@ sub export {
 
     my %out;
     if ($self->binary) {
-        $out{'content-bin'} = encode_base64($self->content);
+        $out{'content-bin'} = b64_encode($self->content);
     } else {
         $out{'content'} = $self->content;
     }
