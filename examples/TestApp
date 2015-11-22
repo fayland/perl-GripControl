@@ -1,0 +1,47 @@
+#!/usr/bin/env perl
+
+use FindBin qw/$Bin/;
+use lib "$Bin/../lib";
+use GripControl qw/decode_websocket_events encode_websocket_events websocket_control_message/;
+use GripControl::WebSocketEvent;
+use Mojolicious::Lite;
+use Mojo::IOLoop;
+use Mojo::Server::Daemon;
+
+any '/ws' => sub {
+    my $c = shift;
+
+    # Validate the Grip-Sig header:
+    # if validate_sig(self.headers.get('Grip-Sig'), '<key>') is False:
+    #     return
+
+    $c->res->headers->header('Sec-WebSocket-Extensions', 'grip; message-prefix=""');
+    $c->res->headers->header('Content-Type', 'application/websocket-events');
+
+    my $request_body = $c->req->body;
+    print STDERR "GET BODY $request_body\n";
+    my @in_events = decode_websocket_events($request_body);
+    if (@in_events and $in_events[0]->type == 'OPEN') {
+        my @out_events;
+        push @out_events, GripControl::WebSocketEvent->new('OPEN');
+        push @out_events, GripControl::WebSocketEvent->new('TEXT', 'c:' .
+            websocket_control_message('subscribe', {'channel' => 'test'})
+        );
+        $c->render(data => encode_websocket_events(@out_events));
+        ## threading?
+        return;
+    }
+
+    print STDERR Dumper(\@in_events); use Data::Dumper;
+    my @out_events;
+    push @out_events, GripControl::WebSocketEvent->new('TEXT', 'hello');
+    $c->render(data => encode_websocket_events(@out_events));
+
+};
+
+my $port   = 80;
+my $daemon = Mojo::Server::Daemon->new(
+  app    => app,
+  listen => ["http://*:$port"]
+);
+$daemon->run;
